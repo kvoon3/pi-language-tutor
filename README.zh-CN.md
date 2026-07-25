@@ -50,7 +50,7 @@ ln -s "$(pwd)/pi-language-tutor" ~/.pi/agent/extensions/pi-language-tutor
 
    这次出现的是 `✏ Writing tutor` 面板：先给你一句地道的学习语言整句表达，再列出关键的新词（每个都用母语讲解——意思、用法、为什么选这个词而不是别的），最后是这句话里的语法点。一个面板把你不会说的那句话讲明白。
 
-3. 写作辅导教过的单词会自动存成记忆卡片。输入 `/learn` 打开复习小窗——Anki 那套玩法：点 Show Answer 翻面，按 Again / Hard / Good / Easy 自评，FSRS 算法决定每个词什么时候再出现。
+3. 写作辅导教过的单词会自动存成记忆卡片。输入 `/flashcards` 打开复习小窗——Anki 那套玩法：点 Show Answer 翻面，按 Again / Hard / Good / Easy 自评，FSRS 算法决定每个词什么时候再出现。
 
 4. agent 回答完，按 `alt+t`（macOS 上是 ⌥T，需要在终端里[把 Option 设为 Meta 键](https://iterm2.com/documentation-preferences-profiles-keys.html)；也可以直接运行 `/translate`）。回复会重新渲染成双语卡片，每个原文段落下面紧跟译文。
 
@@ -78,7 +78,7 @@ ln -s "$(pwd)/pi-language-tutor" ~/.pi/agent/extensions/pi-language-tutor
 | 命令                                   | 作用                                                                                  |
 | -------------------------------------- | ------------------------------------------------------------------------------------- |
 | `/translate` 或 `alt+t`                | 翻译 agent 回复（双语卡片）                                                           |
-| `/learn`                               | 复习写作辅导自动捕获的记忆卡片                                                        |
+| `/flashcards`                               | 复习写作辅导自动捕获的记忆卡片                                                        |
 | `/lang`                                | 打开交互式设置菜单，每个选项都有一行说明                                              |
 | `/lang check off` \| `on` \| `context` | 检查与辅导的模式——`context` 让检查能看到会话内容（`/lang on`/`off` 仍可作为快捷开关） |
 | `/lang tutor on` \| `off`              | 单独开关写作辅导（关闭后母语消息不再显示面板）                                        |
@@ -116,7 +116,7 @@ ln -s "$(pwd)/pi-language-tutor" ~/.pi/agent/extensions/pi-language-tutor
 
 **双语卡片。** 段落按「原文在上、译文在下」排列，和沉浸式翻译一个风格。短代码块（≤5 行）原样保留，更长的用 `[code block ↑ N lines]` 占位——完整代码就在上方的原文里。自动模式下，中间的工具调用叙述和少于 15 个词的回复不会翻译；开启时底部状态栏会显示 `🌐 auto`。
 
-**记忆卡片。** 写作辅导教过的每个单词都会自动存成卡片,按单词去重。`/learn` 打开复习窗口:整个词库一目了然(每张卡的状态——新卡/已到期/何时回来,含遗忘次数),点 Study Now 开始一轮复习。评分是 Anki 语义:Again 和 Hard 会让卡片在本轮末尾再见一次,Good 和 Easy 才算毕业。调度用的是 FSRS(ts-fsrs),关掉了分钟级的短期学习步骤,所以一次评分直接把卡片推到「天」级间隔。新卡每天有引入上限,上限和每轮张数都可以在窗口的 ⚙ 设置里改。按错了?`u` 键(或界面上的 undo)可以撤销上一次评分。每张卡都能在复习页或词库列表里编辑、删除。写盘是原子的;复习窗口开着期间新捕获的词会合并保存,不会被覆盖。
+**记忆卡片。** 写作辅导教过的每个单词都会自动存成卡片,按单词去重。`/flashcards` 打开复习窗口:整个词库一目了然(每张卡的状态——新卡/已到期/何时回来,含遗忘次数),点 Study Now 开始一轮复习。评分是 Anki 语义:Again 和 Hard 会让卡片在本轮末尾再见一次,Good 和 Easy 才算毕业。调度用的是 FSRS(ts-fsrs),关掉了分钟级的短期学习步骤,所以一次评分直接把卡片推到「天」级间隔。新卡每天有引入上限,上限和每轮张数都可以在窗口的 ⚙ 设置里改。按错了?`u` 键(或界面上的 undo)可以撤销上一次评分。每张卡都能在复习页或词库列表里编辑、删除。写盘是原子的;复习窗口开着期间新捕获的词会合并保存,不会被覆盖。
 
 **自定义 provider。** 在 pi 0.81+ 上，写作检查和翻译直接走组合 provider 的 `streamSimple`——与主会话完全相同的分发路径——因此无论 provider 是以配置形式注册（如 Cursor 的 `cursor-sdk`）还是以原生 `Provider` 对象注册，都能正常工作。pi 0.80 上则回落到 pi-ai 的 `completeSimple`，那里的全局 api registry 本就覆盖自定义 provider。
 
@@ -135,4 +135,4 @@ npm run check   # 类型检查
 npm test        # 单元测试：跳过判定和回复解析
 ```
 
-目录结构：`src/core.ts` 放纯逻辑（跳过判定、prompt、解析、卡片拼装，测试只依赖这个文件，不 import 任何 pi 包），`src/config.ts` 负责配置读写。pi 适配层按特性拆分：`src/llm.ts`（模型解析、LLM 调用、会话 fork 捕获）、`src/grammar.ts`（统一的检查入口：分发 Writing check 与 Writing tutor）、`src/tutor.ts`（写作辅导的渲染）、`src/translate.ts`（双语卡片）、`src/settings.ts`（`/lang` 命令和设置菜单），`src/index.ts` 是组装根，把它们接到 pi 上。记忆卡片功能沿用同样的拆法：`src/flashcards.ts`（纯卡片逻辑与 FSRS 调度）、`src/flashcard-settings.ts`（复习设置）、`src/learn.ts`（`/learn` 窗口控制）、`web/flashcards.html`（自包含的复习界面）。`language-learn.ts` 是入口，重新导出核心模块。
+目录结构：`src/core.ts` 放纯逻辑（跳过判定、prompt、解析、卡片拼装，测试只依赖这个文件，不 import 任何 pi 包），`src/config.ts` 负责配置读写。pi 适配层按特性拆分：`src/llm.ts`（模型解析、LLM 调用、会话 fork 捕获）、`src/grammar.ts`（统一的检查入口：分发 Writing check 与 Writing tutor）、`src/tutor.ts`（写作辅导的渲染）、`src/translate.ts`（双语卡片）、`src/settings.ts`（`/lang` 命令和设置菜单），`src/index.ts` 是组装根，把它们接到 pi 上。记忆卡片功能沿用同样的拆法：`src/flashcards.ts`（纯卡片逻辑与 FSRS 调度）、`src/flashcard-settings.ts`（复习设置）、`src/learn.ts`（`/flashcards` 窗口控制）、`web/flashcards.html`（自包含的复习界面）。`language-learn.ts` 是入口，重新导出核心模块。

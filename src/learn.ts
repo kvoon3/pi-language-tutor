@@ -164,7 +164,7 @@ export function registerLearn(pi: ExtensionAPI): void {
 
       case 'start':
         // Queue drained (e.g. session limit hit) but more cards due: deal a
-        // fresh session so Enter keeps reviewing without reopening /learn.
+        // fresh session so Enter keeps reviewing without reopening /flashcards.
         if (queue.length === 0) queue = getDueCards(cards, settings.sessionLimit, settings)
         sendNext()
         return
@@ -242,7 +242,7 @@ export function registerLearn(pi: ExtensionAPI): void {
 
   const openReview = async (ctx: ExtensionContext) => {
     if (!ctx.hasUI || ctx.mode !== 'tui') {
-      ctx.ui.notify('/learn requires interactive TUI mode.', 'warning')
+      ctx.ui.notify('/flashcards requires interactive TUI mode.', 'warning')
       return
     }
 
@@ -262,7 +262,7 @@ export function registerLearn(pi: ExtensionAPI): void {
     })
   }
 
-  pi.registerCommand('learn', {
+  pi.registerCommand('flashcards', {
     description: 'Review flashcards from the Writing tutor',
     handler: async (_args, ctx) => openReview(ctx)
   })
